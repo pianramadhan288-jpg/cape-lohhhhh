@@ -1,7 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { StockMetrics, AnalisaInput, DeepAnalysisResult, PublicCompanyData, AIAnalysisResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// FIX: Pastikan TS menganggap ini string (Vite akan me-replace nilainya saat build)
+const ai = new GoogleGenAI({ apiKey: (process.env.API_KEY as string) || "" });
 
 export const analyzeFundamentalAI = async (metrics: StockMetrics): Promise<AIAnalysisResult> => {
   const prompt = `
@@ -56,7 +57,9 @@ export const analyzeFundamentalAI = async (metrics: StockMetrics): Promise<AIAna
     }
   });
 
-  return JSON.parse(response.text) as AIAnalysisResult;
+  // FIX: Handle potential undefined text
+  const text = response.text || "{}";
+  return JSON.parse(text) as AIAnalysisResult;
 };
 
 export const fetchPublicStockData = async (stockCode: string): Promise<PublicCompanyData> => {
@@ -66,7 +69,10 @@ export const fetchPublicStockData = async (stockCode: string): Promise<PublicCom
     contents: prompt,
     config: { tools: [{ googleSearch: {} }], responseMimeType: "application/json" }
   });
-  return JSON.parse(response.text) as PublicCompanyData;
+  
+  // FIX: Handle potential undefined text
+  const text = response.text || "{}";
+  return JSON.parse(text) as PublicCompanyData;
 };
 
 export const runDeepAnalisa = async (input: AnalisaInput): Promise<DeepAnalysisResult> => {
@@ -144,5 +150,8 @@ export const runDeepAnalisa = async (input: AnalisaInput): Promise<DeepAnalysisR
       }
     }
   });
-  return JSON.parse(response.text) as DeepAnalysisResult;
+  
+  // FIX: Handle potential undefined text
+  const text = response.text || "{}";
+  return JSON.parse(text) as DeepAnalysisResult;
 };
